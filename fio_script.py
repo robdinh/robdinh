@@ -37,6 +37,8 @@ def test(rwmixread_list, bs_list, iodepth, rw, jobname):
 	print("***Transitioning device to steady-state***\n")
 	ss_condition = False
 	round = 0
+
+	f = open(disk_model + "-" + time.strftime("%y%m%d") + "-fio.csv", "a+")
 	
 	while ss_condition == False and round < 25:	
 		round = round + 1
@@ -71,10 +73,6 @@ def test(rwmixread_list, bs_list, iodepth, rw, jobname):
 				#IOPS steady-state check measuring RND Write at 4k bs 
 				if jobname == "iops" and rwmixread == 0 and bs == '4k':
 					ss_condition = steady_state(iops, round, ss_condition)
-
-				#Throughput steady-state check measuring SEQ Write at 128k bs
-				elif jobname == "bw" and rwmixread == 0 and bs == '128k':
-					ss_condition = steady_state(bw, round, ss_condition)
 		
 				#Latency steady-state check measuring RND Write at 4k bs
 				elif jobname == "clat" and rwmixread == 0 and bs == '4k':
@@ -95,13 +93,13 @@ columns="disk;jobname;round;rwmixread;bs;numjobs;iodepth;iops;bandwidth;clatmean
 f = open(disk_model + "-" + time.strftime("%y%m%d") + "-fio.csv", "w+")
 f.write(columns+"\n")
 	
-# IOPS testing			
-test([0, 5, 35, 50, 65, 95, 100], ['1024k', '128k', '64k', '16k', '8k', '4k'], 32, 'randrw', 'iops')
+# IOPS testing - random			
+test([0, 70, 100], ['16k', '8k', '4k'], 32, 'randrw', 'iops')
 
-# Throughput testing
-test([0, 100], ['1024k', '128k'], 32, 'rw', 'bw')
+# IOPS testing - sequential
+test([0, 70, 100], ['16k', '8k', '4k'], 32, 'rw', 'iops')
 				
 # Latency testing
-test([0, 65, 100], ['8k', '4k'], 1, 'randrw', 'clat')
+test([0, 70, 100], ['8k', '4k'], 1, 'randrw', 'clat')
 				
 f.closed
